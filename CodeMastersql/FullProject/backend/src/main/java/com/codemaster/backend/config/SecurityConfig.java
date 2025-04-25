@@ -51,4 +51,3 @@ public class SecurityConfig {
         return config.getAuthenticationManager();
     }
 }
-/* hellp cjlwcwlcncjcnjcnkjwn */

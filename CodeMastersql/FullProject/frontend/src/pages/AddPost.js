@@ -1,98 +1,91 @@
-import { useStates } from "react";
+
+import { useState } from "react";
 import {
-  Typography, Textfield, Button, Box, Paper,
-  Iconbutton, Stack, Linearprogress
+  Typography, TextField, Button, Box, Paper,
+  IconButton, Stack, LinearProgress
 } from "@mui/material";
-
 import PhotoCamera from "@mui/icons-material/PhotoCamera";
-import Deleteicon from "@mui/icons-material/Delete";
-
+import DeleteIcon from "@mui/icons-material/Delete";
 import axios from "../api/axiosConfig";
-import { toastify } from "react-toastify";
+import { toast } from "react-toastify";
 
 export default function AddPost({ onClose, onPostCreated }) {
-  const [title, setTitle] = useStates("");
+  const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [files, setFiles] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleSubmit = async () => {
-    if (title === "" && description === "" && files.length === 0) {
-      toastify.error("All fields are required.");
+    if (!title || !description || files.length === 0) {
+      toast.error("All fields and at least one image are required.");
       return;
     }
 
     setIsSubmitting(true);
-
-    let formData = {};
-    formData.title = title;
-    formData.description = description;
-    formData.files = files;
+    const formData = new FormData();
+    formData.append("title", title);
+    formData.append("description", description);
+    files.forEach((file) => formData.append("files", file));
 
     try {
       await axios.post("/posts", formData, {
-        headers: { "Content-Type": "json" },
+        headers: { "Content-Type": "multipart/form-data" },
       });
-      toastify.success("Post created!");
-      onPostCreated();
-      onClose;
+      toast.success("Post created!");
+      onPostCreated?.(); // Refresh posts if provided
+      onClose(); // Close modal
     } catch (err) {
-      toastify.error("Upload failed!");
+      toast.error(err.response?.data?.message || "Post upload failed");
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleFileChange = (event) => {
-    setFiles(event.target.files);
+  const handleFileChange = (e) => {
+    const selectedFiles = Array.from(e.target.files);
+    setFiles([...files, ...selectedFiles]);
   };
 
-  const removeFile = (idx) => {
-    const clone = files;
-    clone.splice(idx, 1);
-    setFiles(clone);
+  const handleRemoveFile = (index) => {
+    const updated = [...files];
+    updated.splice(index, 1);
+    setFiles(updated);
   };
 
   return (
-    <Paper elevation={2} padding={4}>
-      <Typography variant="h4" color="primary">Create Post</Typography>
+    <Paper elevation={0} sx={{ p: 4, borderRadius: 4 }}>
+      <Typography variant="h5" fontWeight="bold" color="#2196f3" gutterBottom>
+        Create New Post
+      </Typography>
 
-      <Textfield
-        fullwidth
-        label="Post Title"
-        value={title}
-        onChange={(e) => setTitle(e.target.value)}
-      />
+      <TextField fullWidth label="Title" margin="normal" value={title} onChange={(e) => setTitle(e.target.value)} />
+      <TextField fullWidth label="Description" multiline rows={3} margin="normal" value={description} onChange={(e) => setDescription(e.target.value)} />
 
-      <Textfield
-        label="Post Description"
-        multiline
-        rows={4}
-        fullwidth
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-      />
+      <Box mt={2} mb={2}>
+        <Button component="label" variant="contained" startIcon={<PhotoCamera />} sx={{ textTransform: 'none' }}>
+          Select Images
+          <input type="file" hidden multiple accept="image/*,video/*" onChange={handleFileChange} />
+        </Button>
+      </Box>
 
-      <Button variant="outlined" component="label" starticon={<PhotoCamera />}>
-        Upload
-        <input type="file" multiple hidden onChange={handleFileChange} />
-      </Button>
-
-      <Stack direction="row" mt={2} spacing={1}>
-        {files.map((f, idx) => (
-          <Box key={idx} width={100} height={100} position="relative">
-            <img src={URL.createObjectURL(f)} style={{ width: "100%", height: "100%", objectFit: "contain" }} />
-            <Iconbutton size="small" onClick={() => removeFile(idx)}>
-              <Deleteicon />
-            </Iconbutton>
+      <Stack direction="row" spacing={2} flexWrap="wrap" mt={2}>
+        {files.map((file, i) => (
+          <Box key={i} sx={{ position: "relative", width: 80, height: 80 }}>
+            {file.type.startsWith("video/") ? (
+              <video src={URL.createObjectURL(file)} style={{ width: "100%", height: "100%", objectFit: "cover" }} controls />
+            ) : (
+              <img src={URL.createObjectURL(file)} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+            )}
+            <IconButton size="small" onClick={() => handleRemoveFile(i)} sx={{ position: "absolute", top: 0, right: 0, backgroundColor: "#fff" }}>
+              <DeleteIcon fontSize="small" />
+            </IconButton>
           </Box>
         ))}
       </Stack>
 
-      {isSubmitting && <Linearprogress />}
-
-      <Button onClick={handleSubmit} variant="contained" color="success" disabled={isSubmitting}>
-        Submit
+      {isSubmitting && <LinearProgress sx={{ mt: 2 }} />}
+      <Button fullWidth variant="contained" sx={{ mt: 3 }} onClick={handleSubmit} disabled={isSubmitting}>
+        {isSubmitting ? "Uploading..." : "Create Post"}
       </Button>
     </Paper>
   );

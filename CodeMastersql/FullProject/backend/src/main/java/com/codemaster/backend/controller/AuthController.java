@@ -157,7 +157,7 @@ public class AuthController {
     }
 
     @Transactional
-    @DeleteMapping("/delete-user-account")
+    @DeleteMapping("/delete-account")
     public ResponseEntity<Map<String, String>> deleteAccount(HttpServletRequest request) {
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtUtil.extractEmail(token);

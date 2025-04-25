@@ -46,7 +46,7 @@ export default function MyLearningPlans() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editForm, setEditForm] = useState(null);
   const [loading, setLoading] = useState(true);
-  const navigate = useNavigate();
+ 
   const [openAddModal, setOpenAddModal] = useState(false);
 
   const fetchPlans = async () => {
@@ -65,7 +65,21 @@ export default function MyLearningPlans() {
     fetchPlans();
   }, []);
 
+  // const handleOpenEdit = (plan) => {
+  //   setEditForm({
+  //     ...plan,
+  //     topics: plan.topics.join(", "),
+  //     resources: plan.resources.join(", "),
+  //   });
+  //   setEditDialogOpen(true);
+  // };
+
   const handleOpenEdit = (plan) => {
+    if (!plan || !Array.isArray(plan.topics) || !Array.isArray(plan.resources)) {
+      console.error("Invalid plan data:", plan);
+      return; // Or handle the error appropriately
+    }
+  
     setEditForm({
       ...plan,
       topics: plan.topics.join(", "),
@@ -73,6 +87,9 @@ export default function MyLearningPlans() {
     });
     setEditDialogOpen(true);
   };
+
+
+
 
   const handleEditSave = async () => {
     const today = new Date().toISOString().split("T")[0];

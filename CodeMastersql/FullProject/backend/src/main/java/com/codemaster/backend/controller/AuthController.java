@@ -59,7 +59,7 @@ public class AuthController {
     @Autowired
     private NotificationRepository notificationRepository;
 
-    @PostMapping(value = "/signup-with-image", consumes = "multipart/form-data")
+    
     public ResponseEntity<Map<String, String>> signupWithImage(
             @RequestParam("username") String username,
             @RequestParam("email") String email,

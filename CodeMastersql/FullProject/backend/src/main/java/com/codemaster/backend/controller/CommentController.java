@@ -24,7 +24,7 @@ import com.codemaster.backend.repository.UserRepository;
 import com.codemaster.backend.service.CommentService;
 
 @RestController
-@RequestMapping("/api/comments")
+@RequestMapping("/api/comments")// make api request for comments
 public class CommentController {
 
     @Autowired

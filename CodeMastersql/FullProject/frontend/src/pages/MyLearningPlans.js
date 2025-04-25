@@ -108,7 +108,7 @@ export default function MyLearningPlans() {
     }
   };
 
-  // Function to get progress color and icon
+  // Function color and icon of progress
   const getProgressInfo = (progress) => {
     switch (progress) {
       case "Completed":
@@ -620,22 +620,18 @@ export default function MyLearningPlans() {
             </DialogActions>
           </Dialog>
           <Modal
-            // open={openAddModal}
-            // onClose={() => setOpenAddModal(false)}
-            // closeAfterTransition
-            // BackdropComponent={Backdrop}
-            // BackdropProps={{ timeout: 500 }}
-
             open={openAddModal}
             onClose={() => setOpenAddModal(false)}
+            closeAfterTransition
+            BackdropComponent={Backdrop}
+            BackdropProps={{ timeout: 500 }}
           >
             <Fade in={openAddModal}>
               <Box
                 sx={{
-                  width: "85%",
+                  width: "90%",
                   maxWidth: 650,
                   mx: "auto",
-                  bgcolor: "white",
                   mt: "10vh",
                   outline: "none",
                 }}

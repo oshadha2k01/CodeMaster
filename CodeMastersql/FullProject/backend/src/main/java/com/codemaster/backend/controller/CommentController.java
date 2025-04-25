@@ -36,7 +36,7 @@ public class CommentController {
     @Autowired
     private PostRepository postRepository;
 
-    @PostMapping("/{postId}")
+    @PostMapping("/{postId}") //make post mapping 
     public Comment addComment(@PathVariable Long postId, @RequestBody Comment comment, Principal principal) {
         User user = userRepository.findByEmail(principal.getName()).orElseThrow();
         Post post = postRepository.findById(postId).orElseThrow();

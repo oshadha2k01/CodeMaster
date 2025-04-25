@@ -61,7 +61,7 @@ public class CommentController {
         return ResponseEntity.ok(commentService.save(comment));
     }
 
-    @DeleteMapping("/{commentId}")
+    @DeleteMapping("/{commentId}")//make delete api
     public ResponseEntity<?> deleteComment(@PathVariable Long commentId, Principal principal) {
         Comment comment = commentService.getCommentById(commentId);
         String currentUser = principal.getName();

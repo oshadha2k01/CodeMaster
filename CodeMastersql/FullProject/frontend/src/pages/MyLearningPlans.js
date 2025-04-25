@@ -61,106 +61,52 @@ export default function MyLearningPlans() {
     }
   };
 
-  // useEffect(() => {
-  //   fetchPlans();
-  // }, []);
-
-  // const handleOpenEdit = (plan) => {
-  //   setEditForm({
-  //     ...plan,
-  //     topics: plan.topics.join(", "),
-  //     resources: plan.resources.join(", "),
-  //   });
-  //   setEditDialogOpen(true);
-  // };
-
-  // const handleEditSave = async () => {
-  //   const today = new Date().toISOString().split("T")[0];
-
-  //   if (editForm.targetDate < today) {
-  //     toast.error("Target date cannot be in the past.");
-  //     return;
-  //   }
-
-  //   try {
-  //     await axios.post("/learning-plans", {
-  //       ...editForm,
-  //       topics: editForm.topics.split(",").map((t) => t.trim()),
-  //       resources: editForm.resources.split(",").map((r) => r.trim()),
-  //     });
-  //     toast.success("Plan updated!");
-  //     fetchPlans();
-  //     setEditDialogOpen(false);
-  //   } catch (err) {
-  //     toast.error("Update failed!");
-  //   }
-  // };
-
-  // const handleDelete = async (id) => {
-  //   try {
-  //     await axios.delete(`/learning-plans/${id}`);
-  //     toast.success("Plan deleted!");
-  //     fetchPlans();
-  //   } catch (err) {
-  //     toast.error("Failed to delete plan.");
-  //   } finally {
-  //     setConfirmDeleteId(null);
-  //   }
-  // };
-
-
-
   useEffect(() => {
     fetchPlans();
   }, []);
 
-const handleOpenEdit = (plan) => {
-  if (!plan || !Array.isArray(plan.topics) || !Array.isArray(plan.resources)) {
-    console.error("Invalid plan data:", plan);
-    return;
-  }
-  
-  setEditForm({
-    ...plan,
-    topics: plan.topics.join(", "),
-    resources: plan.resources.join(", "),
-  });
-  setEditDialogOpen(true);
-};
-
-const handleEditSave = async () => {
-  const today = new Date().toISOString().split("T")[0];
-
-  if (editForm.targetDate < today) {
-    toast.error("Target date cannot be in the past.");
-    return;
-  }
-
-  try {
-    await axios.post("/learning-plans", {
-      ...editForm,
-      topics: editForm.topics.split(",").map((t) => t.trim()),
-      resources: editForm.resources.split(",").map((r) => r.trim()),
+  const handleOpenEdit = (plan) => {
+    setEditForm({
+      ...plan,
+      topics: plan.topics.join(", "),
+      resources: plan.resources.join(", "),
     });
-    toast.success("Plan updated!");
-    fetchPlans();
-    setEditDialogOpen(false);
-  } catch (err) {
-    toast.error("Update failed!");
-  }
-};
+    setEditDialogOpen(true);
+  };
 
-const handleDelete = async (id) => {
-  try {
-    await axios.delete(`/learning-plans/${id}`);
-    toast.success("Plan deleted!");
-    fetchPlans();
-  } catch (err) {
-    toast.error("Failed to delete plan.");
-  } finally {
-    setConfirmDeleteId(null);
-  }
-};
+  const handleEditSave = async () => {
+    const today = new Date().toISOString().split("T")[0];
+
+    if (editForm.targetDate < today) {
+      toast.error("Target date cannot be in the past.");
+      return;
+    }
+
+    try {
+      await axios.post("/learning-plans", {
+        ...editForm,
+        topics: editForm.topics.split(",").map((t) => t.trim()),
+        resources: editForm.resources.split(",").map((r) => r.trim()),
+      });
+      toast.success("Plan updated!");
+      fetchPlans();
+      setEditDialogOpen(false);
+    } catch (err) {
+      toast.error("Update failed!");
+    }
+  };
+
+  const handleDelete = async (id) => {
+    try {
+      await axios.delete(`/learning-plans/${id}`);
+      toast.success("Plan deleted!");
+      fetchPlans();
+    } catch (err) {
+      toast.error("Failed to delete plan.");
+    } finally {
+      setConfirmDeleteId(null);
+    }
+  };
 
   // Function to get progress color and icon
   const getProgressInfo = (progress) => {
@@ -674,18 +620,22 @@ const handleDelete = async (id) => {
             </DialogActions>
           </Dialog>
           <Modal
+            // open={openAddModal}
+            // onClose={() => setOpenAddModal(false)}
+            // closeAfterTransition
+            // BackdropComponent={Backdrop}
+            // BackdropProps={{ timeout: 500 }}
+
             open={openAddModal}
             onClose={() => setOpenAddModal(false)}
-            closeAfterTransition
-            BackdropComponent={Backdrop}
-            BackdropProps={{ timeout: 500 }}
           >
             <Fade in={openAddModal}>
               <Box
                 sx={{
-                  width: "90%",
+                  width: "85%",
                   maxWidth: 650,
                   mx: "auto",
+                  bgcolor: "white",
                   mt: "10vh",
                   outline: "none",
                 }}

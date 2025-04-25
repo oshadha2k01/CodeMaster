@@ -104,7 +104,7 @@ public class PostController {
 
     @PutMapping(value = "/{id}", consumes = {"multipart/form-data"})
     public ResponseEntity<Post> updatePostWithMedia(@PathVariable Long id,
-            @RequestPart("topic") String title,
+            @RequestPart("title") String title,
             @RequestPart("description") String description,
             @RequestPart(value = "files", required = false) MultipartFile[] files,
             Principal principal) {

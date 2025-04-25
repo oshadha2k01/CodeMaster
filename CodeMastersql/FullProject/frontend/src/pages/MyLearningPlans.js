@@ -46,7 +46,7 @@ export default function MyLearningPlans() {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editForm, setEditForm] = useState(null);
   const [loading, setLoading] = useState(true);
- 
+  const navigate = useNavigate();
   const [openAddModal, setOpenAddModal] = useState(false);
 
   const fetchPlans = async () => {
@@ -61,9 +61,9 @@ export default function MyLearningPlans() {
     }
   };
 
-  useEffect(() => {
-    fetchPlans();
-  }, []);
+  // useEffect(() => {
+  //   fetchPlans();
+  // }, []);
 
   // const handleOpenEdit = (plan) => {
   //   setEditForm({
@@ -74,56 +74,93 @@ export default function MyLearningPlans() {
   //   setEditDialogOpen(true);
   // };
 
-  const handleOpenEdit = (plan) => {
-    if (!plan || !Array.isArray(plan.topics) || !Array.isArray(plan.resources)) {
-      console.error("Invalid plan data:", plan);
-      return; // Or handle the error appropriately
-    }
+  // const handleEditSave = async () => {
+  //   const today = new Date().toISOString().split("T")[0];
+
+  //   if (editForm.targetDate < today) {
+  //     toast.error("Target date cannot be in the past.");
+  //     return;
+  //   }
+
+  //   try {
+  //     await axios.post("/learning-plans", {
+  //       ...editForm,
+  //       topics: editForm.topics.split(",").map((t) => t.trim()),
+  //       resources: editForm.resources.split(",").map((r) => r.trim()),
+  //     });
+  //     toast.success("Plan updated!");
+  //     fetchPlans();
+  //     setEditDialogOpen(false);
+  //   } catch (err) {
+  //     toast.error("Update failed!");
+  //   }
+  // };
+
+  // const handleDelete = async (id) => {
+  //   try {
+  //     await axios.delete(`/learning-plans/${id}`);
+  //     toast.success("Plan deleted!");
+  //     fetchPlans();
+  //   } catch (err) {
+  //     toast.error("Failed to delete plan.");
+  //   } finally {
+  //     setConfirmDeleteId(null);
+  //   }
+  // };
+
+
+
+  useEffect(() => {
+    fetchPlans();
+  }, []);
+
+const handleOpenEdit = (plan) => {
+  if (!plan || !Array.isArray(plan.topics) || !Array.isArray(plan.resources)) {
+    console.error("Invalid plan data:", plan);
+    return;
+  }
   
-    setEditForm({
-      ...plan,
-      topics: plan.topics.join(", "),
-      resources: plan.resources.join(", "),
+  setEditForm({
+    ...plan,
+    topics: plan.topics.join(", "),
+    resources: plan.resources.join(", "),
+  });
+  setEditDialogOpen(true);
+};
+
+const handleEditSave = async () => {
+  const today = new Date().toISOString().split("T")[0];
+
+  if (editForm.targetDate < today) {
+    toast.error("Target date cannot be in the past.");
+    return;
+  }
+
+  try {
+    await axios.post("/learning-plans", {
+      ...editForm,
+      topics: editForm.topics.split(",").map((t) => t.trim()),
+      resources: editForm.resources.split(",").map((r) => r.trim()),
     });
-    setEditDialogOpen(true);
-  };
+    toast.success("Plan updated!");
+    fetchPlans();
+    setEditDialogOpen(false);
+  } catch (err) {
+    toast.error("Update failed!");
+  }
+};
 
-
-
-
-  const handleEditSave = async () => {
-    const today = new Date().toISOString().split("T")[0];
-
-    if (editForm.targetDate < today) {
-      toast.error("Target date cannot be in the past.");
-      return;
-    }
-
-    try {
-      await axios.post("/learning-plans", {
-        ...editForm,
-        topics: editForm.topics.split(",").map((t) => t.trim()),
-        resources: editForm.resources.split(",").map((r) => r.trim()),
-      });
-      toast.success("Plan updated!");
-      fetchPlans();
-      setEditDialogOpen(false);
-    } catch (err) {
-      toast.error("Update failed!");
-    }
-  };
-
-  const handleDelete = async (id) => {
-    try {
-      await axios.delete(`/learning-plans/${id}`);
-      toast.success("Plan deleted!");
-      fetchPlans();
-    } catch (err) {
-      toast.error("Failed to delete plan.");
-    } finally {
-      setConfirmDeleteId(null);
-    }
-  };
+const handleDelete = async (id) => {
+  try {
+    await axios.delete(`/learning-plans/${id}`);
+    toast.success("Plan deleted!");
+    fetchPlans();
+  } catch (err) {
+    toast.error("Failed to delete plan.");
+  } finally {
+    setConfirmDeleteId(null);
+  }
+};
 
   // Function to get progress color and icon
   const getProgressInfo = (progress) => {

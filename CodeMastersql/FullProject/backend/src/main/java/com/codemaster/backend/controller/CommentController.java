@@ -24,7 +24,7 @@ import com.codemaster.backend.repository.UserRepository;
 import com.codemaster.backend.service.CommentService;
 
 @RestController
-@RequestMapping("/api/comments")
+@RequestMapping("/api/commments") 
 public class CommentController {
 
     @Autowired
@@ -74,5 +74,4 @@ public class CommentController {
         }
         return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
     }
-
 }

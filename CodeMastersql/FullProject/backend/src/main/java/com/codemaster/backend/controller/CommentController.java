@@ -45,13 +45,13 @@ public class CommentController {
         return commentService.save(comment);
     }
 
-    @GetMapping("/{postId}")
+    @GetMapping("/{postId}") //make get by id requests
     public List<Comment> getComments(@PathVariable Long postId) {
         Post post = postRepository.findById(postId).orElseThrow();
         return commentService.getCommentsByPost(post);
     }
 
-    @PutMapping("/{commentId}")
+    @PutMapping("/{commentId}") // make update api
     public ResponseEntity<Comment> updateComment(@PathVariable Long commentId, @RequestBody Map<String, String> request, Principal principal) {
         Comment comment = commentService.getCommentById(commentId);
         if (!comment.getUser().getEmail().equals(principal.getName())) {

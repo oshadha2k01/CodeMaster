@@ -31,7 +31,7 @@ export default function AddPost({ onClose, onPostCreated }) {
       await axios.post("/posts", formData, {
         headers: { "Content-Type": "multipart/form-data" },
       });
-      toast.success("Post Done!");
+      toast.success("Post created!");
       onPostCreated?.(); // Refresh posts if provided
       onClose(); // Close modal
     } catch (err) {

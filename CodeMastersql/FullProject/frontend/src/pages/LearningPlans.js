@@ -238,7 +238,7 @@ export default function LearningPlans() {
                     </Box>
                 </CardContent>
                 
-                {/* <LinearProgress 
+                <LinearProgress 
                   variant="determinate" 
                   value={getProgressPercentage(plan.progress)} 
                   sx={{ 
@@ -247,7 +247,7 @@ export default function LearningPlans() {
                       bgcolor: getProgressColor(plan.progress)
                     }
                   }}
-                /> */}
+                />
               </Card>
             </Grid>
           ))}

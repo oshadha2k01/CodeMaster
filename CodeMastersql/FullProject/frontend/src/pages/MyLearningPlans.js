@@ -340,7 +340,7 @@ export default function MyLearningPlans() {
 
                         <Divider sx={{ my: 2 }} />
 
-                        <Box sx={{ mb: 2 }}>
+                        {/* <Box sx={{ mb: 2 }}>
                           <Typography
                             variant="subtitle2"
                             color="text.secondary"
@@ -352,7 +352,7 @@ export default function MyLearningPlans() {
                           <Typography variant="body2" color="text.secondary">
                             {plan.resources.join(", ")}
                           </Typography>
-                        </Box>
+                        </Box> */}
 
                         <Typography variant="body2" color="text.secondary">
                           <strong>Target Date:</strong>{" "}

@@ -9,8 +9,8 @@ import {
   Menu,
   MenuItem,
   Box,
-  // Badge,
-  // Tooltip,
+  Badge,
+  Tooltip,
   Divider,
 } from "@mui/material";
 import NotificationsIcon from "@mui/icons-material/Notifications";
@@ -61,7 +61,7 @@ export default function Navbar() {
       <Toolbar sx={{ display: "flex", justifyContent: "space-between", px: { xs: 2, md: 4 } }}>
         
         {/* Logo / Brand */}
-        {/* <Typography
+        <Typography
           variant="h6"
           sx={{
             fontWeight: "bold",
@@ -73,7 +73,7 @@ export default function Navbar() {
           onClick={() => user && navigate("/home")}
         >
           {/* SkillShare */}
-        </Typography> */}
+        </Typography>
 
         {user ? (
           <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>

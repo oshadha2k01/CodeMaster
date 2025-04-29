@@ -623,8 +623,8 @@ export default function MyLearningPlans() {
             open={openAddModal}
             onClose={() => setOpenAddModal(false)}
             closeAfterTransition
-            BackdropComponent={Backdrop}
-            BackdropProps={{ timeout: 500 }}
+            // BackdropComponent={Backdrop}
+            // BackdropProps={{ timeout: 500 }}
           >
             <Fade in={openAddModal}>
               <Box

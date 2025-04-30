@@ -47,31 +47,31 @@ export default function Leftsidebar() {
   const renderNavItems = () => (
     <>
       {navItems.map((item) => (
-        <Button
-          key={item.path}
-          component={Link}
-          to={item.path}
-          startIcon={item.icon}
-          sx={{
-            textTransform: 'none',
-            color: isActive(item.path) ? '#000' : '#333',
-            fontWeight: isActive(item.path) ? '600' : '400',
-            backgroundColor: isActive(item.path) ? '#f5f5f5' : 'transparent',
-            borderRadius: '8px',
-            py: 1.5,
-            px: 2,
-            justifyContent: { xs: 'center', md: 'flex-start' },
-            width: '100%',
-            '&:hover': {
-              backgroundColor: '#f5f5f5',
-            },
-            transition: 'all 0.2s ease',
-          }}
-        >
-          <Box sx={{ display: { xs: 'none', md: 'block' }, ml: 1 }}>
-            {item.text}
-          </Box>
-        </Button>
+        // <Button
+        //   key={item.path}
+        //   component={Link}
+        //   to={item.path}
+        //   startIcon={item.icon}
+        //   sx={{
+        //     textTransform: 'none',
+        //     color: isActive(item.path) ? '#000' : '#333',
+        //     fontWeight: isActive(item.path) ? '600' : '400',
+        //     backgroundColor: isActive(item.path) ? '#f5f5f5' : 'transparent',
+        //     borderRadius: '8px',
+        //     py: 1.5,
+        //     px: 2,
+        //     justifyContent: { xs: 'center', md: 'flex-start' },
+        //     width: '100%',
+        //     '&:hover': {
+        //       backgroundColor: '#f5f5f5',
+        //     },
+        //     transition: 'all 0.2s ease',
+        //   }}
+        // >
+        //   <Box sx={{ display: { xs: 'none', md: 'block' }, ml: 1 }}>
+        //     {item.text}
+        //   </Box>
+        // </Button>
       ))}
     </>
   );

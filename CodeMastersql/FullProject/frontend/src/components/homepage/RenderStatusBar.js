@@ -5,9 +5,9 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 
 export default function RenderStatusBar({
-  statuses,
-  user,
-  handleOpenStatus,
+  // statuses,
+  // user,
+  // handleOpenStatus,
   handleDeleteStatus,
   handleEditStatus
 }) {

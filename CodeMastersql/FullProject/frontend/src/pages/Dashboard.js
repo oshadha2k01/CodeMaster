@@ -7,9 +7,9 @@ export default function Dashboard() {
   const navigate = useNavigate();
 
   return (
-    // <Container>
-    //   <Typography variant="h4">Welcome, {user?.sub}</Typography>
-    //   <Button variant="outlined" onClick={() => { logout(); navigate('/signin'); }}>Logout</Button>
-    // </Container>
+    <Container>
+      <Typography variant="h4">Welcome, {user?.sub}</Typography>
+      <Button variant="outlined" onClick={() => { logout(); navigate('/signin'); }}>Logout</Button>
+    </Container>
   );
 }

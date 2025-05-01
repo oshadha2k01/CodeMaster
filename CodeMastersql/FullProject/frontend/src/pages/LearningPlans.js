@@ -186,34 +186,23 @@ export default function LearningPlans() {
                   </Box>
 
                   <Box sx={{ display: 'flex', alignItems: 'flex-start', mb: 1.5 }}>
-  <LinkIcon sx={{ color: '#2196f3', mr: 1, fontSize: 18, mt: 0.3 }} />
-  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5 }}>
-    {plan.resources.map((resource, index) => (
-      <Tooltip title={resource} arrow key={index}>
-        <Typography
-          component="a"
-          href={resource}
-          target="_blank"
-          rel="noopener noreferrer"
-          variant="body2"
-          color="#2196f3"
-          sx={{
-            textDecoration: 'none',
-            overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            display: '-webkit-box',
-            WebkitLineClamp: 1,
-            WebkitBoxOrient: 'vertical',
-            lineHeight: 1.3,
-            maxWidth: '100%'
-          }}
-        >
-          {resource}
-        </Typography>
-      </Tooltip>
-    ))}
-  </Box>
-</Box>
+                    <LinkIcon sx={{ color: '#2196f3', mr: 1, fontSize: 18, mt: 0.3 }} />
+                    <Typography 
+                      variant="body2" 
+                      color="rgba(0,0,0,0.7)"
+                      sx={{
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        display: '-webkit-box',
+                        WebkitLineClamp: 2,
+                        WebkitBoxOrient: 'vertical',
+                        lineHeight: 1.3,
+                        height: '2.6em'
+                      }}
+                    >
+                      {plan.resources.join(', ')}
+                    </Typography>
+                  </Box>
 
                   <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <CalendarTodayIcon sx={{ color: '#2196f3', mr: 1, fontSize: 18 }} />

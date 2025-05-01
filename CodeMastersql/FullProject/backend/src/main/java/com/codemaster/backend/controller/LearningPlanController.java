@@ -4,6 +4,7 @@ import java.security.Principal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -41,10 +42,17 @@ public class LearningPlanController {
         return planService.getPlansByUser(user);
     }
 
-    @GetMapping("/all")
-    public List<LearningPlanResponse> getAllPlans() {
-        return planService.getAllPlansAsResponse();
-    }
+   @GetMapping("/all")
+public ResponseEntity<ApiResponse<List<LearningPlanResponse>>> getAllPlans() {
+    List<LearningPlanResponse> plans = planService.getAllPlansAsResponse();
+    ApiResponse<List<LearningPlanResponse>> response = new ApiResponse<>(
+        true,
+        "Learning plans fetched successfully",
+        plans
+    );
+    return ResponseEntity.ok(response);
+}
+
 
     @DeleteMapping("/{id}")
     public void deletePlan(@PathVariable Long id, Principal principal) {

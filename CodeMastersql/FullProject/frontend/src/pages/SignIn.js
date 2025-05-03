@@ -1,5 +1,3 @@
-
-
 import { useState } from "react";
 import {
   Box,
@@ -20,11 +18,8 @@ import { useAuth } from "../auth/AuthContext";
 import GoogleIcon from '@mui/icons-material/Google';
 import EmailIcon from '@mui/icons-material/Email';
 import LockIcon from '@mui/icons-material/Lock';
-import ArrowForwardIcon from '@mui/icons-material/ArrowForward';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-
-// same imports...
 
 export default function SignIn() {
   const [email, setEmail] = useState("");
@@ -38,13 +33,18 @@ export default function SignIn() {
       toast.error("Please fill in both email and password");
       return;
     }
+
     try {
       const res = await axios.post("/auth/signin", { email, password });
-      login(res.data.token);
-      toast.success("Login successful!");
-      navigate("/home");
+      if (res.data?.token) {
+        login(res.data.token);
+        toast.success("Login successful!");
+        navigate("/home", { replace: true });
+      } else {
+        throw new Error("Token not received");
+      }
     } catch (err) {
-      toast.error(err.response?.data?.message || "Login failed");
+      toast.error(err.response?.data?.message || err.message || "Login failed");
     }
   };
 
@@ -75,6 +75,7 @@ export default function SignIn() {
         <Stack spacing={3}>
           <TextField
             label="Email Address"
+            type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             fullWidth
@@ -107,7 +108,10 @@ export default function SignIn() {
               ),
               endAdornment: (
                 <InputAdornment position="end">
-                  <IconButton onClick={() => setShowPassword((prev) => !prev)}>
+                  <IconButton
+                    onClick={() => setShowPassword((prev) => !prev)}
+                    edge="end"
+                  >
                     {showPassword ? <VisibilityOff /> : <Visibility />}
                   </IconButton>
                 </InputAdornment>
@@ -123,77 +127,4 @@ export default function SignIn() {
 
           <Typography
             variant="body2"
-            sx={{
-              textAlign: 'right',
-              color: '#3b82f6',
-              fontWeight: 600,
-              cursor: 'pointer',
-              '&:hover': { textDecoration: 'underline' }
-            }}
-          >
-            Forgot password?
-          </Typography>
-
-          <Button
-            variant="contained"
-            fullWidth
-            onClick={handleSubmit}
-            sx={{
-              py: 1.5,
-              borderRadius: 3,
-              textTransform: 'none',
-              background: 'linear-gradient(135deg, #60a5fa, #818cf8)',
-              fontWeight: 600,
-              fontSize: '1rem',
-              '&:hover': {
-                background: 'linear-gradient(135deg, #3b82f6, #6366f1)',
-                boxShadow: '0 8px 20px rgba(99, 102, 241, 0.3)'
-              }
-            }}
-          >
-            Sign In
-          </Button>
-
-          <Divider sx={{ my: 3 }}><Typography variant="body2" sx={{ color: '#94a3b8' }}>OR</Typography></Divider>
-
-          <Button
-            variant="outlined"
-            fullWidth
-            startIcon={<GoogleIcon />}
-            sx={{
-              py: 1.5,
-              borderRadius: 3,
-              borderColor: '#e5e7eb',
-              textTransform: 'none',
-              fontWeight: 500,
-              backgroundColor: '#ffffff',
-              '&:hover': {
-                borderColor: '#60a5fa',
-                backgroundColor: '#f1f5f9'
-              }
-            }}
-            onClick={() => window.location.href = "http://localhost:9090/oauth2/authorization/google"}
-          >
-            Sign in with Google
-          </Button>
-
-          <Typography variant="body2" align="center" sx={{ mt: 3, color: '#6b7280' }}>
-            Don't have an account?{' '}
-            <Typography
-              component="span"
-              sx={{
-                color: '#3b82f6',
-                fontWeight: 600,
-                cursor: 'pointer',
-                '&:hover': { textDecoration: 'underline' }
-              }}
-              onClick={() => navigate("/signup")}
-            >
-              Sign up
-            </Typography>
-          </Typography>
-        </Stack>
-      </Container>
-    </Box>
-  );
-}
+            sx

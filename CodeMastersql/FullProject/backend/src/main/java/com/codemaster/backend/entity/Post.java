@@ -8,74 +8,115 @@ import java.util.Set;
 import org.hibernate.annotations.OnDelete;
 import org.hibernate.annotations.OnDeleteAction;
 
-import jakarta.persistence.*;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.Size;
-
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import jakarta.persistence.ElementCollection;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.GenerationType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "posts")
-@Getter
-@Setter
-@NoArgsConstructor
-@ToString
 public class Post {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @NotBlank(message = "Title is mandatory")
-    @Size(max = 100, message = "Title can't be longer than 100 characters")
     private String title;
-
-    @NotBlank(message = "Description is mandatory")
-    @Column(columnDefinition = "TEXT")
     private String description;
 
     @ElementCollection
-    @CollectionTable(name = "post_media", joinColumns = @JoinColumn(name = "post_id"))
-    @Column(name = "media_path")
     private List<String> mediaPaths;
 
     private LocalDateTime createdAt;
 
-    @ManyToOne(fetch = FetchType.LAZY, optional = false)
+    @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
-    @OnDelete(action = OnDeleteAction.CASCADE)
+    @OnDelete(action = OnDeleteAction.CASCADE) // ✅ Enables deletion of posts when user is deleted
     private User user;
 
     @ManyToMany
     @JoinTable(
-        name = "post_likes",
-        joinColumns = @JoinColumn(name = "post_id"),
-        inverseJoinColumns = @JoinColumn(name = "user_id")
+            name = "post_likes",
+            joinColumns = @JoinColumn(name = "post_id"),
+            inverseJoinColumns = @JoinColumn(name = "user_id")
     )
     private Set<User> likedBy = new HashSet<>();
 
-    /**
-     * Automatically sets createdAt before the entity is persisted.
-     */
-    @PrePersist
-    protected void onCreate() {
-        this.createdAt = LocalDateTime.now();
+    // --- Constructors ---
+    public Post() {
     }
 
-    /**
-     * Add a like from a user.
-     */
-    public void addLike(User user) {
-        this.likedBy.add(user);
+    public Post(Long id, String title, String description, List<String> mediaPaths,
+            LocalDateTime createdAt, User user, Set<User> likedBy) {
+        this.id = id;
+        this.title = title;
+        this.description = description;
+        this.mediaPaths = mediaPaths;
+        this.createdAt = createdAt;
+        this.user = user;
+        this.likedBy = likedBy;
     }
 
-    /**
-     * Remove a like from a user.
-     */
-    public void removeLike(User user) {
-        this.likedBy.remove(user);
+    // --- Getters and Setters ---
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+    }
+
+    public String getDescription() {
+        return description;
+    }
+
+    public void setDescription(String description) {
+        this.description = description;
+    }
+
+    public List<String> getMediaPaths() {
+        return mediaPaths;
+    }
+
+    public void setMediaPaths(List<String> mediaPaths) {
+        this.mediaPaths = mediaPaths;
+    }
+
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+
+    public void setCreatedAt(LocalDateTime createdAt) {
+        this.createdAt = createdAt;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public Set<User> getLikedBy() {
+        return likedBy;
+    }
+
+    public void setLikedBy(Set<User> likedBy) {
+        this.likedBy = likedBy;
     }
 }

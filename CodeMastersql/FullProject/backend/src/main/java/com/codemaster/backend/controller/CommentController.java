@@ -51,15 +51,7 @@ public class CommentController {
         return commentService.getCommentsByPost(post);
     }
 
-    @PutMapping("/{commentId}")
-    public ResponseEntity<Comment> updateComment(@PathVariable Long commentId, @RequestBody Map<String, String> request, Principal principal) {
-        Comment comment = commentService.getCommentById(commentId);
-        if (!comment.getUser().getEmail().equals(principal.getName())) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
-        }
-        comment.setContent(request.get("content"));
-        return ResponseEntity.ok(commentService.save(comment));
-    }
+    
 
     @DeleteMapping("/{commentId}")
     public ResponseEntity<?> deleteComment(@PathVariable Long commentId, Principal principal) {

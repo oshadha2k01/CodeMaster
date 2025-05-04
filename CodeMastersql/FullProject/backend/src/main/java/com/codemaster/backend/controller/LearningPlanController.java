@@ -4,8 +4,13 @@ import java.security.Principal;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.codemaster.backend.entity.LearningPlan;
 import com.codemaster.backend.entity.LearningPlanResponse;
@@ -24,39 +29,30 @@ public class LearningPlanController {
     private UserRepository userRepository;
 
     @PostMapping
-    public ResponseEntity<LearningPlan> createPlan(@RequestBody LearningPlan plan, Principal principal) {
-        User user = userRepository.findByEmail(principal.getName())
-                                  .orElseThrow(() -> new RuntimeException("User not found"));
+    public LearningPlan createPlan(@RequestBody LearningPlan plan, Principal principal) {
+        User user = userRepository.findByEmail(principal.getName()).orElseThrow();
         plan.setUser(user);
-        LearningPlan savedPlan = planService.save(plan);
-        return ResponseEntity.ok(savedPlan);
+        return planService.save(plan);
     }
 
     @GetMapping("/my")
-    public ResponseEntity<List<LearningPlan>> getMyPlans(Principal principal) {
-        User user = userRepository.findByEmail(principal.getName())
-                                  .orElseThrow(() -> new RuntimeException("User not found"));
-        List<LearningPlan> plans = planService.getPlansByUser(user);
-        return ResponseEntity.ok(plans);
+    public List<LearningPlan> myPlans(Principal principal) {
+        User user = userRepository.findByEmail(principal.getName()).orElseThrow();
+        return planService.getPlansByUser(user);
     }
 
     @GetMapping("/all")
-    public ResponseEntity<List<LearningPlanResponse>> getAllPlans() {
-        List<LearningPlanResponse> plans = planService.getAllPlansAsResponse();
-        return ResponseEntity.ok(plans);
+    public List<LearningPlanResponse> getAllPlans() {
+        return planService.getAllPlansAsResponse();
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deletePlan(@PathVariable Long id, Principal principal) {
-        User user = userRepository.findByEmail(principal.getName())
-                                  .orElseThrow(() -> new RuntimeException("User not found"));
+    public void deletePlan(@PathVariable Long id, Principal principal) {
+        User user = userRepository.findByEmail(principal.getName()).orElseThrow();
         LearningPlan plan = planService.getPlanById(id);
-
         if (!plan.getUser().getId().equals(user.getId())) {
-            return ResponseEntity.status(403).build(); // Forbidden
+            throw new RuntimeException("You are not authorized to delete this plan.");
         }
-
         planService.deleteById(id);
-        return ResponseEntity.noContent().build();
     }
 }

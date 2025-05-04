@@ -191,8 +191,8 @@ export default function LearningPlans() {
                       variant="body2" 
                       color="rgba(0,0,0,0.7)"
                       sx={{
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
+                        // overflow: 'hidden',
+                        // textOverflow: 'ellipsis',
                         display: '-webkit-box',
                         WebkitLineClamp: 2,
                         WebkitBoxOrient: 'vertical',
@@ -204,7 +204,7 @@ export default function LearningPlans() {
                     </Typography>
                   </Box>
 
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                  {/* <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
                     <CalendarTodayIcon sx={{ color: '#2196f3', mr: 1, fontSize: 18 }} />
                     <Typography variant="body2" color="rgba(0,0,0,0.7)">
                       {new Date(plan.targetDate).toLocaleDateString('en-US', {
@@ -213,7 +213,7 @@ export default function LearningPlans() {
                         day: 'numeric'
                       })}
                     </Typography>
-                  </Box>
+                  </Box> */}
 
                   <Divider sx={{ my: 2, background: 'rgba(0,0,0,0.08)' }} />
                   

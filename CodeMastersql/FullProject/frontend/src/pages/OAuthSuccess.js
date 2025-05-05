@@ -1,3 +1,4 @@
+
 import { useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../auth/AuthContext';
@@ -10,21 +11,15 @@ export default function OAuthSuccess() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (!token) {
-      toast.error('Login failed');
-      navigate('/signin', { replace: true });
-      return;
-    }
-
-    try {
+    if (token) {
       login(token);
       toast.success('Logged in with Google');
-      navigate('/home', { replace: true });
-    } catch (err) {
-      toast.error('Authentication error');
-      navigate('/signin', { replace: true });
+      navigate('/home');
+    } else {
+      toast.error('Login failed');
+      navigate('/signin');
     }
-  }, [token, login, navigate]);
+  }, [token]);
 
   return null;
 }

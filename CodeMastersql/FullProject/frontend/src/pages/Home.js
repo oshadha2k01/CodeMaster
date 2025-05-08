@@ -204,7 +204,7 @@ export default function InstagramHomeFeed() {
           sx={{
             display: "flex",
             justifyContent: "center",
-            borderBottom: "1px solid #efefef",
+            borderBottom: "1px solidrgb(161, 161, 161)",
             py: 1,
           }}
         >
@@ -466,7 +466,7 @@ export default function InstagramHomeFeed() {
                     alignItems: "center",
                     mt: 2,
                     pt: 2,
-                    borderTop: "1px solid #efefef",
+                    borderTop: "1px solidrgb(234, 231, 231)",
                   }}
                 >
                   <TextField

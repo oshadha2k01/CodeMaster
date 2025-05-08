@@ -23,7 +23,11 @@ import com.codemaster.backend.service.FollowService;
 @RequestMapping("/api/follow")
 public class FollowController {
 
-   
+    @Autowired
+    private FollowService followService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @PostMapping("/{userId}")
     public Follow sendFollowRequest(@PathVariable Long userId, Principal principal) {

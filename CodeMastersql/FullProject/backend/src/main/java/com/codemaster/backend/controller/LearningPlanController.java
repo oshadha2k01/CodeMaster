@@ -35,11 +35,11 @@ public class LearningPlanController {
         return planService.save(plan);
     }
 
-    @GetMapping("/my")
-    public List<LearningPlan> myPlans(Principal principal) {
-        User user = userRepository.findByEmail(principal.getName()).orElseThrow();
-        return planService.getPlansByUser(user);
-    }
+    // @GetMapping("/my")
+    // public List<LearningPlan> myPlans(Principal principal) {
+    //     User user = userRepository.findByEmail(principal.getName()).orElseThrow();
+    //     return planService.getPlansByUser(user);
+    // }
 
     @GetMapping("/all")
     public List<LearningPlanResponse> getAllPlans() {

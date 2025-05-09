@@ -115,7 +115,7 @@ public class AuthController {
         return ResponseEntity.ok(user.getProfileImage());
     }
 
-    @PutMapping(value = "/update-profile", consumes = "multipart/form-data")
+    @PutMapping(value = "/update-profile", consumes = "multipart/form-data") /* */
     public ResponseEntity<Map<String, String>> updateProfile(
             @RequestParam("username") String username,
             @RequestParam("email") String email,

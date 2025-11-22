@@ -32,6 +32,8 @@ import com.codemaster.backend.repository.PostRepository;
 import com.codemaster.backend.repository.UserRepository;
 import com.codemaster.backend.service.FollowService;
 import com.codemaster.backend.service.PostService;
+import com.codemaster.backend.dto.PostDTO;
+import java.util.stream.Collectors;
 // import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -86,14 +88,16 @@ public class PostController {
     }
 
     @GetMapping("/my")
-    public List<Post> myPosts(Principal principal) {
+    public List<PostDTO> myPosts(Principal principal) {
         User user = userRepository.findByEmail(principal.getName()).orElseThrow();
-        return postService.getPostsByUser(user);
+        return postService.getPostsByUser(user).stream()
+                .map(p -> postService.convertToDTO(p, principal.getName()))
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/all")
-    public List<Post> getAllPosts() {
-        return postService.getAllPosts();
+    public List<PostDTO> getAllPosts(Principal principal) {
+        return postService.getAllPostsDTO(principal.getName());
     }
 
     @GetMapping("/{id}")
@@ -154,12 +158,14 @@ public class PostController {
     }
 
     @GetMapping("/following")
-    public List<Post> getFollowingPosts(Principal principal) {
+    public List<PostDTO> getFollowingPosts(Principal principal) {
         User user = userRepository.findByEmail(principal.getName()).orElseThrow();
         List<User> followingUsers = followService.getAcceptedFollowing(user)
                 .stream().map(Follow::getFollowing).toList();
 
-        return postRepository.findByUserInOrderByCreatedAtDesc(followingUsers);
+        return postRepository.findByUserInOrderByCreatedAtDesc(followingUsers).stream()
+                .map(p -> postService.convertToDTO(p, principal.getName()))
+                .collect(Collectors.toList());
     }
 
 }

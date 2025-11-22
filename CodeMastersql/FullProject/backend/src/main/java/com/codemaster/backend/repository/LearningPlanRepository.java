@@ -15,4 +15,5 @@ public interface LearningPlanRepository extends JpaRepository<LearningPlan, Long
     void deleteByUser(User user); // for manual deletion if needed
 
     List<LearningPlan> findByUser(User user);
+    List<LearningPlan> findByTitleContainingIgnoreCase(String title);
 }

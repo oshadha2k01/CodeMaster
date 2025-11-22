@@ -15,6 +15,12 @@ import com.codemaster.backend.entity.Post;
 import com.codemaster.backend.entity.User;
 import com.codemaster.backend.repository.PostRepository;
 import com.codemaster.backend.repository.UserRepository;
+import com.codemaster.backend.repository.CommentRepository;
+import com.codemaster.backend.dto.PostDTO;
+import java.util.stream.Collectors;
+import org.springframework.beans.factory.annotation.Value;
+import jakarta.annotation.PostConstruct;
+import java.io.File;
 
 @Service
 public class PostService {
@@ -27,6 +33,65 @@ public class PostService {
 
     @Autowired
     private NotificationService notificationService;
+
+    @Autowired
+    private CommentRepository commentRepository;
+
+    @Value("${file.upload-dir}")
+    private String uploadDir;
+
+    @PostConstruct
+    public void init() {
+        File dir = new File(uploadDir);
+        if (!dir.exists()) {
+            dir.mkdirs();
+        }
+    }
+
+    public PostDTO convertToDTO(Post post, String currentUserEmail) {
+        PostDTO dto = new PostDTO();
+        dto.setId(post.getId());
+        dto.setTitle(post.getTitle());
+        dto.setDescription(post.getDescription());
+        dto.setMediaPaths(post.getMediaPaths());
+        dto.setCreatedAt(post.getCreatedAt());
+        
+        PostDTO.UserDTO userDto = new PostDTO.UserDTO();
+        userDto.setId(post.getUser().getId());
+        userDto.setUsername(post.getUser().getUsername());
+        userDto.setEmail(post.getUser().getEmail());
+        userDto.setProfileImage(post.getUser().getProfileImage());
+        dto.setUser(userDto);
+
+        dto.setLikeCount(post.getLikedBy().size());
+        dto.setLiked(post.getLikedBy().stream().anyMatch(u -> u.getEmail().equals(currentUserEmail)));
+        dto.setCommentCount(commentRepository.countByPost(post));
+        
+        dto.setLatestComments(commentRepository.findByPost(post).stream()
+                .sorted((c1, c2) -> c2.getId().compareTo(c1.getId()))
+                .limit(3)
+                .map(c -> {
+                    PostDTO.CommentDTO cDto = new PostDTO.CommentDTO();
+                    cDto.setId(c.getId());
+                    cDto.setContent(c.getContent());
+                    PostDTO.UserDTO cuDto = new PostDTO.UserDTO();
+                    cuDto.setId(c.getUser().getId());
+                    cuDto.setUsername(c.getUser().getUsername());
+                    cuDto.setEmail(c.getUser().getEmail());
+                    cuDto.setProfileImage(c.getUser().getProfileImage());
+                    cDto.setUser(cuDto);
+                    return cDto;
+                })
+                .collect(Collectors.toList()));
+
+        return dto;
+    }
+
+    public List<PostDTO> getAllPostsDTO(String currentUserEmail) {
+        return postRepository.findAll().stream()
+                .map(p -> convertToDTO(p, currentUserEmail))
+                .collect(Collectors.toList());
+    }
 
     public Post save(Post post) {
         post.setCreatedAt(LocalDateTime.now());
@@ -56,7 +121,9 @@ public class PostService {
             // Optional: delete old files if replacing
             for (String oldPath : post.getMediaPaths()) {
                 try {
-                    Path filePath = Paths.get("src/main/resources/static" + oldPath);
+                    // Extract filename from /uploads/filename
+                    String filename = oldPath.substring(oldPath.lastIndexOf("/") + 1);
+                    Path filePath = Paths.get(uploadDir, filename);
                     Files.deleteIfExists(filePath);
                 } catch (IOException e) {
                     e.printStackTrace();
@@ -90,7 +157,8 @@ public class PostService {
         // Delete associated media files from disk
         for (String mediaPath : post.getMediaPaths()) {
             try {
-                Path filePath = Paths.get("src/main/resources/static" + mediaPath);
+                String filename = mediaPath.substring(mediaPath.lastIndexOf("/") + 1);
+                Path filePath = Paths.get(uploadDir, filename);
                 Files.deleteIfExists(filePath);
             } catch (IOException e) {
                 e.printStackTrace(); // Optional: log or handle

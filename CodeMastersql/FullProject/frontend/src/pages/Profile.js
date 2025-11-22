@@ -22,6 +22,7 @@ import {
   Chip,
   Badge,
   AvatarGroup,
+  Tooltip
 } from "@mui/material";
 import { Swiper, SwiperSlide } from "swiper/react";
 import EditIcon from "@mui/icons-material/Edit";
@@ -53,6 +54,12 @@ export default function Profile() {
     following: 0,
   });
   const [showAddPostModal, setShowAddPostModal] = useState(false);
+  
+  // Mock Heatmap Data (30 days)
+  const heatmapData = Array.from({ length: 30 }, (_, i) => ({
+    day: i,
+    count: Math.floor(Math.random() * 5)
+  }));
 
   const fetchFollowCounts = () => {
     axios.get("/follow/counts").then((res) => setFollowCounts(res.data));
@@ -225,6 +232,60 @@ export default function Profile() {
             <Grid container spacing={4}>
               <Grid item xs={12} md={8}>
                 <StatusUpload onUpload={loadStatuses} />
+                
+                {/* Contribution Heatmap */}
+                <Box sx={{ mt: 4 }}>
+                  <Typography variant="subtitle1" fontWeight="600" color="#2d3748" mb={2}>
+                    Contribution Activity
+                  </Typography>
+                  <Paper 
+                    variant="outlined" 
+                    sx={{ 
+                      p: 2, 
+                      borderRadius: 3, 
+                      bgcolor: '#fafbff',
+                      border: '1px solid #eef2f6',
+                      display: 'flex',
+                      flexDirection: 'column'
+                    }}
+                  >
+                    <Box sx={{ display: 'flex', gap: 0.8, flexWrap: 'wrap' }}>
+                      {heatmapData.map((d) => (
+                        <Tooltip key={d.day} title={`${d.count} contributions on day ${d.day}`}>
+                          <Box
+                            sx={{
+                              width: 16,
+                              height: 16,
+                              borderRadius: 0.5,
+                              bgcolor: d.count === 0 ? '#ebedf0' : 
+                                       d.count === 1 ? '#c6e48b' : 
+                                       d.count === 2 ? '#7bc96f' : 
+                                       d.count === 3 ? '#239a3b' : '#196127',
+                              cursor: 'pointer',
+                              transition: 'transform 0.1s',
+                              '&:hover': { transform: 'scale(1.2)', zIndex: 1 }
+                            }}
+                          />
+                        </Tooltip>
+                      ))}
+                    </Box>
+                    <Box sx={{ mt: 1.5, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                      <Typography variant="caption" color="text.secondary">
+                        Last 30 days activity
+                      </Typography>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                        <Typography variant="caption" color="text.secondary">Less</Typography>
+                        {[0, 1, 2, 3, 4].map(lvl => (
+                          <Box key={lvl} sx={{ 
+                            width: 10, height: 10, borderRadius: 0.2, 
+                            bgcolor: lvl === 0 ? '#ebedf0' : lvl === 1 ? '#c6e48b' : lvl === 2 ? '#7bc96f' : lvl === 3 ? '#239a3b' : '#196127' 
+                          }} />
+                        ))}
+                        <Typography variant="caption" color="text.secondary">More</Typography>
+                      </Box>
+                    </Box>
+                  </Paper>
+                </Box>
               </Grid>
               <Grid item xs={12} md={4}>
                 <Box

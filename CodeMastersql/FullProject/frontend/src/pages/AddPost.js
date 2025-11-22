@@ -2,10 +2,13 @@
 import { useState } from "react";
 import {
   Typography, TextField, Button, Box, Paper,
-  IconButton, Stack, LinearProgress
+  IconButton, Stack, LinearProgress, CircularProgress, Collapse, Alert
 } from "@mui/material";
-import PhotoCamera from "@mui/icons-material/PhotoCamera";
-import DeleteIcon from "@mui/icons-material/Delete";
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import TranslateIcon from '@mui/icons-material/Translate';
+import { MenuItem, Select, FormControl, InputLabel } from "@mui/material";
+import Editor from "@monaco-editor/react";
+import AutoFixHighIcon from '@mui/icons-material/AutoFixHigh';
 import axios from "../api/axiosConfig";
 import { toast } from "react-toastify";
 
@@ -14,6 +17,12 @@ export default function AddPost({ onClose, onPostCreated }) {
   const [description, setDescription] = useState("");
   const [files, setFiles] = useState([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [aiSuggestion, setAiSuggestion] = useState("");
+  const [isAiLoading, setIsAiLoading] = useState(false);
+  const [language, setLanguage] = useState("javascript");
+  const [targetLang, setTargetLang] = useState("python");
+  const [isTranslating, setIsTranslating] = useState(false);
+  const [isRefactoring, setIsRefactoring] = useState(false);
 
   const handleSubmit = async () => {
     if (!title || !description || files.length === 0) {
@@ -41,6 +50,51 @@ export default function AddPost({ onClose, onPostCreated }) {
     }
   };
 
+  const getAiSuggestion = async () => {
+    if (!description) {
+      toast.info("Please enter some code/description for the AI to analyze.");
+      return;
+    }
+    setIsAiLoading(true);
+    try {
+      const res = await axios.post("/ai/suggest", { code: description });
+      setAiSuggestion(res.data.suggestion);
+    } catch (err) {
+      toast.error("Failed to fetch AI suggestions.");
+    } finally {
+      setIsAiLoading(false);
+    }
+  };
+
+  const translateCode = async () => {
+    if (!description) return;
+    setIsTranslating(true);
+    try {
+      const res = await axios.post("/ai/translate", { code: description, targetLanguage: targetLang });
+      setDescription(res.data.translation);
+      setLanguage(targetLang);
+      toast.success(`Translated to ${targetLang}!`);
+    } catch (err) {
+      toast.error("Translation failed.");
+    } finally {
+      setIsTranslating(false);
+    }
+  };
+
+  const refactorCode = async () => {
+    if (!description) return;
+    setIsRefactoring(true);
+    try {
+      const res = await axios.post("/ai/refactor", { code: description });
+      setDescription(res.data.refactored);
+      toast.success("Code optimized by AI!");
+    } catch (err) {
+      toast.error("Refactoring failed.");
+    } finally {
+      setIsRefactoring(false);
+    }
+  };
+
   const handleFileChange = (e) => {
     const selectedFiles = Array.from(e.target.files);
     setFiles([...files, ...selectedFiles]);
@@ -59,7 +113,92 @@ export default function AddPost({ onClose, onPostCreated }) {
       </Typography>
 
       <TextField fullWidth label="Title" margin="normal" value={title} onChange={(e) => setTitle(e.target.value)} />
-      <TextField fullWidth label="Description" multiline rows={3} margin="normal" value={description} onChange={(e) => setDescription(e.target.value)} />
+      
+      <FormControl fullWidth margin="normal">
+        <InputLabel>Language</InputLabel>
+        <Select value={language} label="Language" onChange={(e) => setLanguage(e.target.value)}>
+          <MenuItem value="javascript">JavaScript</MenuItem>
+          <MenuItem value="python">Python</MenuItem>
+          <MenuItem value="java">Java</MenuItem>
+          <MenuItem value="cpp">C++</MenuItem>
+        </Select>
+      </FormControl>
+
+      <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block' }}>
+        Code Editor
+      </Typography>
+      <Box sx={{ border: '1px solid #ddd', borderRadius: 1, overflow: 'hidden', mt: 0.5, mb: 2 }}>
+        <Editor
+          height="300px"
+          language={language}
+          theme="vs-dark"
+          value={description}
+          onChange={(val) => setDescription(val)}
+          options={{
+            minimap: { enabled: false },
+            fontSize: 14,
+            scrollBeyondLastLine: false,
+            automaticLayout: true,
+          }}
+        />
+      </Box>
+
+      <Box sx={{ mt: 1, mb: 2, display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+        <Button 
+          startIcon={isAiLoading ? <CircularProgress size={16} /> : <AutoAwesomeIcon />}
+          onClick={getAiSuggestion}
+          disabled={isAiLoading}
+          variant="outlined"
+          color="secondary"
+          size="small"
+          sx={{ textTransform: 'none', borderRadius: 2 }}
+        >
+          {isAiLoading ? "Analyzing..." : "AI Suggestions"}
+        </Button>
+
+        <Button 
+          startIcon={isRefactoring ? <CircularProgress size={16} /> : <AutoFixHighIcon />}
+          onClick={refactorCode}
+          disabled={isRefactoring}
+          variant="outlined"
+          color="primary"
+          size="small"
+          sx={{ textTransform: 'none', borderRadius: 2 }}
+        >
+          {isRefactoring ? "Refactoring..." : "Magic Refactor"}
+        </Button>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <Button 
+            startIcon={isTranslating ? <CircularProgress size={16} /> : <TranslateIcon />}
+            onClick={translateCode}
+            disabled={isTranslating}
+            variant="outlined"
+            size="small"
+            sx={{ textTransform: 'none', borderRadius: 2 }}
+          >
+            Translate to
+          </Button>
+          <Select 
+            size="small" 
+            value={targetLang} 
+            onChange={(e) => setTargetLang(e.target.value)}
+            sx={{ height: 31, borderRadius: 2 }}
+          >
+            <MenuItem value="javascript">JS</MenuItem>
+            <MenuItem value="python">Python</MenuItem>
+            <MenuItem value="java">Java</MenuItem>
+            <MenuItem value="cpp">C++</MenuItem>
+          </Select>
+        </Box>
+
+        <Collapse in={!!aiSuggestion} sx={{ mt: 2, width: '100%' }}>
+          <Alert severity="info" onClose={() => setAiSuggestion("")} sx={{ borderRadius: 2, whiteSpace: 'pre-line' }}>
+            <Typography variant="body2" fontWeight="bold" gutterBottom>CodeMaster AI Suggestion:</Typography>
+            {aiSuggestion}
+          </Alert>
+        </Collapse>
+      </Box>
 
       <Box mt={2} mb={2}>
         <Button component="label" variant="contained" startIcon={<PhotoCamera />} sx={{ textTransform: 'none' }}>

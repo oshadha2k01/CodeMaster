@@ -10,4 +10,5 @@ import com.codemaster.backend.entity.Post;
 public interface CommentRepository extends JpaRepository<Comment, Long> {
 
     List<Comment> findByPost(Post post);
+    int countByPost(Post post);
 }

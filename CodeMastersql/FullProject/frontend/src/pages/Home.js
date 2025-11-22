@@ -34,11 +34,15 @@ import {
   Notifications,
 } from "@mui/icons-material";
 import "swiper/css";
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { atomDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import PlayArrowIcon from '@mui/icons-material/PlayArrow';
 
 import Leftsidebar from "../components/homepage/Leftsidebar";
 import StatusViewer from "../components/homepage/StatusViewer";
 import RightSidebar from "../components/homepage/Rightsidebar";
 import RenderStatusBar from "../components/homepage/RenderStatusBar";
+import ChatWindow from "../components/ChatWindow";
 
 export default function InstagramHomeFeed() {
   const [comments, setComments] = useState({});
@@ -50,7 +54,7 @@ export default function InstagramHomeFeed() {
   const [allUsers, setAllUsers] = useState([]);
   const [followStatus, setFollowStatus] = useState({});
   const [activeTab, setActiveTab] = useState("following");
-  const BASE_URL = "http://localhost:9090";
+  const BASE_URL = process.env.REACT_APP_BASE_URL || "http://localhost:9090";
   const { user } = useAuth();
   const navigate = useNavigate();
   const [statuses, setStatuses] = useState([]);
@@ -59,6 +63,9 @@ export default function InstagramHomeFeed() {
   const handleCloseStatus = () => setOpenStatus(null);
   const [editingStatus, setEditingStatus] = useState(null);
   const [showAllComments, setShowAllComments] = useState({});
+  const [selectedChatRecipient, setSelectedChatRecipient] = useState(null);
+  const [executionResult, setExecutionResult] = useState({});
+  const [isExecuting, setIsExecuting] = useState({});
 
   useEffect(() => {
     loadPosts();
@@ -73,15 +80,18 @@ export default function InstagramHomeFeed() {
         : "/posts/following";
 
     axios.get(endpoint).then((res) => {
-      setPosts(res.data);
-      res.data.forEach((post) => {
-        axios.get(`/comments/${post.id}`).then((res) => {
-          setComments((prev) => ({ ...prev, [post.id]: res.data }));
-        });
-        axios.get(`/posts/${post.id}/like-status`).then((res) => {
-          setLikeStatus((prev) => ({ ...prev, [post.id]: res.data }));
-        });
+      const postsWithData = res.data;
+      setPosts(postsWithData);
+      
+      // Initialize comments and likes from DTO
+      const newComments = {};
+      const newLikes = {};
+      postsWithData.forEach(post => {
+        newComments[post.id] = post.latestComments || [];
+        newLikes[post.id] = { liked: post.liked, likeCount: post.likeCount };
       });
+      setComments(prev => ({ ...prev, ...newComments }));
+      setLikeStatus(prev => ({ ...prev, ...newLikes }));
     });
 
     axios.get("/users/all").then((res) => {
@@ -173,6 +183,24 @@ export default function InstagramHomeFeed() {
     axios.delete(`/status/${id}`).then(() => loadStatuses());
   };
 
+  const runCode = async (postId, code) => {
+    setIsExecuting(prev => ({ ...prev, [postId]: true }));
+    try {
+      // Simple language detection for demo
+      let languageId = 63; // JS default
+      if (code.includes('public class') || code.includes('System.out')) languageId = 62;
+      else if (code.includes('def ') || code.includes('import ')) languageId = 71;
+      else if (code.includes('#include')) languageId = 54;
+
+      const res = await axios.post("/execute", { code, languageId });
+      setExecutionResult(prev => ({ ...prev, [postId]: res.data }));
+    } catch (err) {
+      toast.error("Execution failed.");
+    } finally {
+      setIsExecuting(prev => ({ ...prev, [postId]: false }));
+    }
+  };
+
   return (
     <Box
       sx={{
@@ -181,6 +209,10 @@ export default function InstagramHomeFeed() {
         minHeight: "100vh",
       }}
     >
+      <ChatWindow 
+        recipient={selectedChatRecipient} 
+        onClose={() => setSelectedChatRecipient(null)} 
+      />
       <StatusViewer
         status={editingStatus || openStatus}
         onClose={() => {
@@ -345,9 +377,9 @@ export default function InstagramHomeFeed() {
                   {likeStatus[post.id]?.likeCount === 1 ? "like" : "likes"}
                 </Typography>
 
-                {/* Caption */}
+                {/* Caption / Code */}
                 <Box sx={{ mt: 1 }}>
-                  <Typography variant="body2" component="span">
+                  <Typography variant="body2" component="div">
                     <Typography
                       variant="body2"
                       component="span"
@@ -356,24 +388,63 @@ export default function InstagramHomeFeed() {
                     >
                       {post.user.username}
                     </Typography>
-                    {post.description}
+                    
+                    {/* Detect if description looks like code or just text */}
+                    {post.description?.includes(';') || post.description?.includes('{') ? (
+                      <Box sx={{ mt: 1, borderRadius: 1, overflow: 'hidden', fontSize: '0.85rem' }}>
+                        <SyntaxHighlighter 
+                          language="javascript" 
+                          style={atomDark}
+                          customStyle={{ margin: 0, padding: '12px' }}
+                        >
+                          {post.description}
+                        </SyntaxHighlighter>
+                        
+                        <Box sx={{ p: 1, display: 'flex', justifyContent: 'flex-end', bgcolor: '#1d1d1d' }}>
+                          <Button 
+                            size="small" 
+                            startIcon={isExecuting[post.id] ? <CircularProgress size={16} /> : <PlayArrowIcon />}
+                            onClick={() => runCode(post.id, post.description)}
+                            disabled={isExecuting[post.id]}
+                            sx={{ color: '#4caf50', textTransform: 'none' }}
+                          >
+                            {isExecuting[post.id] ? "Running..." : "Run Code"}
+                          </Button>
+                        </Box>
+                        
+                        {executionResult[post.id] && (
+                          <Box sx={{ p: 2, bgcolor: '#000', color: '#0f0', fontFamily: 'monospace', fontSize: '0.8rem' }}>
+                            <Typography variant="caption" sx={{ display: 'block', mb: 1, color: '#aaa' }}>OUTPUT:</Typography>
+                            {executionResult[post.id].stdout || executionResult[post.id].stderr || executionResult[post.id].compile_output || "No output."}
+                            {executionResult[post.id].status && (
+                              <Typography variant="caption" sx={{ display: 'block', mt: 1, color: '#666' }}>
+                                Status: {executionResult[post.id].status.description} | Time: {executionResult[post.id].time}s
+                              </Typography>
+                            )}
+                          </Box>
+                        )}
+                      </Box>
+                    ) : (
+                      <span>{post.description}</span>
+                    )}
                   </Typography>
                 </Box>
 
                 {/* View all comments link if more than 2 */}
-                {comments[post.id]?.length > 2 && !showAllComments[post.id] && (
+                {post.commentCount > (comments[post.id]?.length || 0) && !showAllComments[post.id] && (
                   <Typography
                     variant="body2"
                     color="text.secondary"
                     sx={{ mt: 1, cursor: "pointer" }}
-                    onClick={() =>
-                      setShowAllComments((prev) => ({
-                        ...prev,
-                        [post.id]: true,
-                      }))
-                    }
+                    onClick={() => {
+                      // Fetch all comments if not already fetched
+                      axios.get(`/comments/${post.id}`).then(res => {
+                        setComments(prev => ({ ...prev, [post.id]: res.data }));
+                        setShowAllComments((prev) => ({ ...prev, [post.id]: true }));
+                      });
+                    }}
                   >
-                    View all {comments[post.id]?.length} comments
+                    View all {post.commentCount} comments
                   </Typography>
                 )}
 
@@ -513,6 +584,7 @@ export default function InstagramHomeFeed() {
         followStatus={followStatus}
         handleFollowRequest={handleFollowRequest}
         handleUnfollow={handleUnfollow}
+        onOpenChat={setSelectedChatRecipient}
       />
     </Box>
   );

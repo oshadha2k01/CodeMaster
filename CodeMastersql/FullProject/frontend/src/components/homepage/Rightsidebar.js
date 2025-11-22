@@ -1,7 +1,8 @@
 
-import { Box, Avatar, Typography, Button } from "@mui/material";
+import { Box, Avatar, Typography, Button, IconButton } from "@mui/material";
+import ChatIcon from '@mui/icons-material/Chat';
 
-export default function Rightsidebar({ user, allUsers, followStatus, handleFollowRequest, handleUnfollow }) {
+export default function Rightsidebar({ user, allUsers, followStatus, handleFollowRequest, handleUnfollow, onOpenChat }) {
   return (
     <Box
       sx={{
@@ -118,19 +119,28 @@ export default function Rightsidebar({ user, allUsers, followStatus, handleFollo
                 </Typography>
               </Box>
               {followStatus[u.id] === "ACCEPTED" ? (
-                <Button
-                  size="small"
-                  onClick={() => handleUnfollow(u.id)}
-                  sx={{
-                    color: 'black',
-                    textTransform: 'none',
-                    fontWeight: '600',
-                    fontSize: '0.75rem',
-                    p: 0.5
-                  }}
-                >
-                  Following
-                </Button>
+                <Box sx={{ display: 'flex', gap: 0.5 }}>
+                  <IconButton 
+                    size="small" 
+                    onClick={() => onOpenChat(u)}
+                    sx={{ color: '#0095f6' }}
+                  >
+                    <ChatIcon fontSize="small" />
+                  </IconButton>
+                  <Button
+                    size="small"
+                    onClick={() => handleUnfollow(u.id)}
+                    sx={{
+                      color: 'black',
+                      textTransform: 'none',
+                      fontWeight: '600',
+                      fontSize: '0.75rem',
+                      p: 0.5
+                    }}
+                  >
+                    Following
+                  </Button>
+                </Box>
               ) : (
                 <Button
                   size="small"

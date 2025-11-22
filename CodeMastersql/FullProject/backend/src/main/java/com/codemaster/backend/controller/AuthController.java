@@ -13,7 +13,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -49,15 +49,7 @@ public class AuthController {
     @Value("${file.upload-dir}")
     private String uploadDir;
     @Autowired
-    private LearningPlanRepository learningPlanRepository;
-    @Autowired
-    private PostRepository postRepository;
-    @Autowired
-    private FollowRepository followRepository;
-    @Autowired
-    private StatusRepository statusRepository;
-    @Autowired
-    private NotificationRepository notificationRepository;
+    private PasswordEncoder passwordEncoder;
 
     @PostMapping(value = "/signup-with-image", consumes = "multipart/form-data")
     public ResponseEntity<Map<String, String>> signupWithImage(
@@ -73,7 +65,7 @@ public class AuthController {
         User user = new User();
         user.setUsername(username);
         user.setEmail(email);
-        user.setPassword(new BCryptPasswordEncoder().encode(password));
+        user.setPassword(passwordEncoder.encode(password));
         user.setRoles(Collections.singleton(Role.USER));
 
         if (file != null && !file.isEmpty()) {
@@ -106,7 +98,7 @@ public class AuthController {
         User user = userRepository.findByEmail(email).orElseThrow();
 
         String filename = UUID.randomUUID() + "_" + file.getOriginalFilename();
-        Path path = Paths.get("src/main/resources/static/uploads/" + filename);
+        Path path = Paths.get(uploadDir, filename);
         Files.write(path, file.getBytes());
 
         user.setProfileImage("/uploads/" + filename);
@@ -149,7 +141,7 @@ public class AuthController {
         user.setEmail(email);
 
         if (password != null && !password.isBlank()) {
-            user.setPassword(new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder().encode(password));
+            user.setPassword(passwordEncoder.encode(password));
         }
 
         userRepository.save(user);
@@ -161,23 +153,13 @@ public class AuthController {
     public ResponseEntity<Map<String, String>> deleteAccount(HttpServletRequest request) {
         String token = request.getHeader("Authorization").substring(7);
         String email = jwtUtil.extractEmail(token);
-        User user = userRepository.findByEmail(email).orElse(null);
-
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", "User not found"));
+        
+        try {
+            userService.deleteUser(email);
+            return ResponseEntity.ok(Map.of("message", "Account deleted successfully"));
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(Map.of("message", e.getMessage()));
         }
-
-        // ✅ Ensure all deletions are wrapped in a transaction
-        postRepository.deleteAll(postRepository.findByUser(user));
-        learningPlanRepository.deleteByUser(user);
-        followRepository.deleteByFollowing(user);
-        followRepository.deleteByFollower(user);
-        statusRepository.deleteByUser(user);
-        notificationRepository.deleteByUser(user);
-
-        userRepository.delete(user);
-
-        return ResponseEntity.ok(Map.of("message", "Account deleted successfully"));
     }
 
 }

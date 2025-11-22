@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 
 import com.codemaster.backend.entity.Notification;
@@ -16,12 +17,18 @@ public class NotificationService {
     @Autowired
     private NotificationRepository notificationRepository;
 
+    @Autowired
+    private SimpMessagingTemplate messagingTemplate;
+
     public void createNotification(User recipient, String message) {
         Notification notification = new Notification();
         notification.setUser(recipient);
         notification.setMessage(message);
         notification.setTimestamp(LocalDateTime.now());
         notificationRepository.save(notification);
+
+        // Push real-time notification
+        messagingTemplate.convertAndSendToUser(recipient.getEmail(), "/queue/notifications", message);
     }
 
     public List<Notification> getNotificationsForUser(User user) {
